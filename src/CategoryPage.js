@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { setCategory, setTime, setMoves, setGameStarted, setRanking, setBestScore} from './gameSlice';
+import { setCategory, setTime, setMoves, setGameStarted } from './gameSlice';
 import Game from './Game';
 
 

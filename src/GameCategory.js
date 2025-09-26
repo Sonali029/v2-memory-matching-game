@@ -1,4 +1,3 @@
-import react, {useState, useEffect} from "react";
 import HeadingComponent from "./headingComponent";
 import { useNavigate} from "react-router-dom";
 import { useDispatch } from 'react-redux';
