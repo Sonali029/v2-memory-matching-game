@@ -77,73 +77,57 @@ const gameSlice = createSlice({
             state.color = getRandomColor();
         }, 
         setCategory(state, action) {
-            console.log("category action", action, state)
             state.category = action.payload;
         },
         setColor(state, action) {
-            console.log("color action", action, state)
             state.color = action.payload;
         },
         setSize(state, action) {
-            console.log("size action", action, state)
             state.size = action.payload;
         },
         setMoves(state, action) {
-            console.log("moves action", action, state)
             state.moves = action.payload;
         }, 
         incrementMoves(state) {
             state.moves += 1;
         },
         setTime(state, action) {
-            console.log("time action", action, state)
             state.time = action.payload;
         },
         incrementTime(state) {
             state.time += 1;
         },
         setFlippedCards(state, action) {
-            console.log("flipped cards action", action, state)
             state.flippedCards = action.payload;
         },
         setMatchedCards(state, action) {
-            console.log("matched cards action", action, state)
             state.matchedCards = action.payload;
         },
         setAllMatched(state, action) {
-            console.log("set all matched action", action, state)
             state.allMatched = action.payload;
         },
         setGameStarted(state, action) {
-            console.log("game started action", action, state)
             state.gameStarted = action.payload;
         },
         setHeading(state, action) {
-            console.log("heading action", action, state)
             state.heading = action.payload;
         },
         setRanking(state, action) {
-            console.log("ranking action", action, state)
             state.ranking = action.payload;
         },
         setBestScore(state, action) {
-            console.log("best score action", action, state)
             state.bestScore = action.payload;
         }, 
         setSymbol(state, action) {
-            console.log("symbol action", action, state)
             state.symbol = action.payload;
         },
         setDescription(state, action) {
-            console.log("description action", action, state)
             state.description = action.payload;
         },
         setSquares(state, action) {
-            console.log("squares action", action, state)
             state.squares = action.payload;
         },
         restartGame(state) {
-            console.log("restart game", state)
             state.moves = 0;
             state.time = 0;
             state.color = getRandomColor();

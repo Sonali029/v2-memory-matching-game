@@ -9,7 +9,6 @@ import {startGame,
     setCorrectNumber,
     setWrongNumber,
     incrementDigitLength} from './longestNumberSlice';
-
 import { getRandomNumber } from "./longestNumberSlice";
 
 const LongestNumberGame = () => {

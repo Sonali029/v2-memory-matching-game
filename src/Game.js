@@ -18,29 +18,22 @@ import { initializeBoard,
     setSymbol,
     setDescription,
     setSquares,
+    getRandomColor,
+    generateSquares,
     restartGame} from './gameSlice';
 import Board from './Board';
-import { Link } from "react-router-dom";
 import CommonHeading from "./CommonHeading";
-import { getRandomColor } from "./gameSlice";
-import { generateSquares } from "./gameSlice";
+import PairMatchDetails from "./PairMatchDetails";
+import ScoreBoard from "./ScoreBoard";
+import WinScreen from "./WinScreen";
+import BottomMenu from "./BottomMenu";
 
 const Game = () => {
     const dispatch = useDispatch();
-    const category = useSelector((state) => state.game.category);
-    console.log("dispatch", dispatch)
-    const { rows, cols } = useSelector((state) => state.game.size);
-
     const gameState = useSelector((state) => state.game);
-    const { squares, moves, time, gameStarted, flippedCards, matchedCards, allMatched, ranking, heading, symbol, description, color, bestScore } = gameState;
-    // console.log("category", category);
-    // console.log("rows, cols", rows, cols);
-    // console.log("gaemstate", gameState)
-    useEffect(() => {
-        dispatch(initializeBoard({ category }));
-        dispatch(setColor(getRandomColor()));
-    }, [dispatch, category])
- 
+    const { squares,size, moves, time, gameStarted, flippedCards, matchedCards, allMatched, ranking, heading, symbol, description, color, bestScore, category } = gameState;
+    const {rows, cols} = size;
+
    const handleClick = (rowIndex, colIndex) => {
     const cell = squares[rowIndex][colIndex];
 
@@ -71,265 +64,200 @@ const Game = () => {
     dispatch(setFlippedCards(newFlipped));
    }
 
-
-   useEffect(() => {
-    if (flippedCards.length == 2) {
-        const [first, second] = flippedCards;
-        const firstCard = squares[first.rowIndex][first.colIndex].card;
-        const secondCard = squares[second.rowIndex][second.colIndex].card;
-
-        if(!firstCard || !secondCard) {
-            return;
-        }
-
-        if (firstCard.symbol == secondCard.symbol) {
-            const updated = squares.map((row, rowIdx) => 
-                row.map((cell, colIdx) => {
-                    if (
-                        ((rowIdx == first.rowIndex) && (colIdx == first.colIndex)) ||
-                        ((rowIdx == second.rowIndex) && (colIdx == second.colIndex))
-                    ) {
-                        return {...cell, matched : true}
-                    }
-                    return cell;
-                })
-            )
-            dispatch(setSquares(updated));
-            dispatch(setMatchedCards(true));
-            dispatch(setFlippedCards([]));
-            dispatch(setSymbol(firstCard.symbol));
-            dispatch(setDescription(firstCard.description));
-        } else {
-            setTimeout(() => {
-                const updated = squares.map((row, rowIdx) =>
-                    row.map((cell, colIdx) => {
-                        if (
-                            ((rowIdx == first.rowIndex) && (colIdx == first.colIndex)) ||
-                            ((rowIdx == second.rowIndex) && (colIdx == second.colIndex))
-                        ) {
-                            return {...cell, flipped : false}
-                        }
-                        return cell;
-                    })
-                )
-                dispatch(setSquares(updated));
-                dispatch(setFlippedCards([]));
-            }, 700)
-        }
-    }
-   }, [flippedCards, squares, dispatch])
-
-
-    useEffect(() => {
-        const isAllMatched = squares.flat().every(cell => cell.matched);
-        if (isAllMatched) {
-            dispatch(setHeading(true));
-        }
-        dispatch(setAllMatched(isAllMatched));
-      }, [squares, dispatch]);
-      
-      
-    useEffect(() => {
-        if (gameStarted) {
-            const timer = setInterval(() => {
-                dispatch(incrementTime());
-            }, 1000);
-            return () => {
-                clearInterval(timer);
-            }
-        }
-    }, [gameStarted, dispatch]);
-    
-    const formatTime = (timeInSeconds) => {
-        const minutes = Math.floor(timeInSeconds / 60);
-        const seconds = timeInSeconds % 60;
-        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    };
-
-    const BottomHeading = ({options}) => {
-        return (
-            <>
-            {options.map((option, index) => (
-                <div className="bottom-menu" key = {index}>
-                <Link to = {option.link}> {option.content} </Link>
-                </div>
-            ))}
-            </>
-        )
-    }
-
     const restartGameHandler = () => {
         dispatch(restartGame());
+        dispatch(setMoves(0));
+        dispatch(setTime(0));
         dispatch(setColor(getRandomColor()));
-    }
-
-    const playSameLevel = () => {
         dispatch(setAllMatched(false));
         dispatch(setFlippedCards([]));
         dispatch(setMatchedCards(false));
-        dispatch(restartGame());
+        dispatch(setGameStarted(false));
         const squares = generateSquares(category, rows, cols);
         dispatch(setSquares(squares));
+
+
+    }
+
+    const playSameLevel = () => {
+        restartGameHandler();
     }
 
     const playNextLevel = () => {
         const newRows = rows + 1;
         const newCols = cols + 1;
         dispatch(setSize({ rows: newRows, cols: newCols }));
-        dispatch(setAllMatched(false));
-        dispatch(setFlippedCards([]));
-        dispatch(setMatchedCards(false));
-        dispatch(restartGame());
+        restartGameHandler();
+
         const squares = generateSquares(category, newRows, newCols);
         dispatch(setSquares(squares));
     }
 
+    //Initialize the board
+    useEffect(() => {
+        dispatch(initializeBoard({ category }));
+        dispatch(setColor(getRandomColor()));
+
+        const key = `ranking-${category}-${rows}-${cols}`;
+        const existingScores = JSON.parse(localStorage.getItem(key)) || [];
+        if (existingScores.length) {
+            dispatch(setBestScore(existingScores[0].moves));
+            dispatch(setRanking(existingScores));
+        } else {
+            dispatch(setBestScore(0));
+            dispatch(setRanking([]));
+        }
+
+    }, [dispatch, category, rows, cols])
+    
+    //Flipped Cards Logic
+    useEffect(() => {
+        if (flippedCards.length == 2) {
+            const [first, second] = flippedCards;
+            const firstCard = squares[first.rowIndex][first.colIndex].card;
+            const secondCard = squares[second.rowIndex][second.colIndex].card;
+            
+            if(!firstCard || !secondCard) {
+                return;
+            }
+            if (firstCard.symbol == secondCard.symbol) {
+                const updated = squares.map((row, rowIdx) => 
+                    row.map((cell, colIdx) => {
+                        if (
+                            ((rowIdx == first.rowIndex) && (colIdx == first.colIndex)) ||
+                            ((rowIdx == second.rowIndex) && (colIdx == second.colIndex))
+                        ) {
+                            return {...cell, matched : true}
+                        }
+                        return cell;
+                    })
+                )
+                dispatch(setSquares(updated));
+                dispatch(setMatchedCards(true));
+                dispatch(setFlippedCards([]));
+                dispatch(setSymbol(firstCard.symbol));
+                dispatch(setDescription(firstCard.description));
+            } else {
+                setTimeout(() => {
+                    const updated = squares.map((row, rowIdx) =>
+                        row.map((cell, colIdx) => {
+                            if (
+                                ((rowIdx == first.rowIndex) && (colIdx == first.colIndex)) ||
+                                ((rowIdx == second.rowIndex) && (colIdx == second.colIndex))
+                            ) {
+                                return {...cell, flipped : false}
+                            }
+                            return cell;
+                        })
+                    )
+                    dispatch(setSquares(updated));
+                    dispatch(setFlippedCards([]));
+                }, 700)
+            }
+        }
+    }, [flippedCards, squares, dispatch])
+       
+    //Check if all cards matched
+    useEffect(() => {
+        const isAllMatched = squares.flat().every(cell => cell.matched);
+        if (isAllMatched) {
+            dispatch(setHeading(true));
+        }
+        dispatch(setAllMatched(isAllMatched));
+    }, [squares, dispatch]);
+          
+    // Timer Logic
+    useEffect(() => {
+        if (!gameStarted) return;
+
+        const timer = setInterval(() => {
+            dispatch(incrementTime());
+        }, 1000);
+        return () => {
+            clearInterval(timer);
+        }
+    }, [gameStarted, dispatch]);
+    
+    // Stop timer when all matched
     useEffect (() => {
         if (allMatched && gameStarted) {
             dispatch(setGameStarted(false));
         }
     }, [gameStarted, allMatched, dispatch])
-
+    
+    // Hide heading after 1.5 sec
     useEffect(() => {
         if (heading) {
             setTimeout(() => {
                 dispatch(setMatchedCards(false));
             }, 1500);
-        }
-    },[heading])
-
+            }
+    },[heading, dispatch])
+    
+    // Update ranking and best score in local storage
     useEffect(() => {
-        if (allMatched && gameStarted) {
+        const isAllMatched = squares.flat().every(cell => cell.matched);
+    
+        dispatch(setAllMatched(isAllMatched));
+    
+        if (isAllMatched) {
+            dispatch(setHeading(true));
+            dispatch(setGameStarted(false));
+    
+            // Update ranking right here
+            const finalScore = { moves, time };
             const key = `ranking-${category}-${rows}-${cols}`;
-            const currentScore = {moves, time};
+            const currentScore = { moves, time };
             const existingScores = JSON.parse(localStorage.getItem(key)) || [];
             const updatedScores = [...existingScores, currentScore]
                 .sort((a, b) => a.moves - b.moves || a.time - b.time)
                 .slice(0, 3);
             localStorage.setItem(key, JSON.stringify(updatedScores));
             dispatch(setRanking(updatedScores));
-            dispatch(setBestScore(updatedScores[0].moves || 0));
+            dispatch(setBestScore(updatedScores[0]?.moves || 0));
         }
-    }, [allMatched])
+    }, [allMatched]);
 
-    const winIcons = ["🥇", "🥈", "🥉"];
-      
     return (
-        <div className = "game-background">
-            {!matchedCards && (
-                <CommonHeading />
-            )}
-
-            {matchedCards && (
-                <div className = "pair-match">
-                    <div className = "discovered">
-                        Discovered
-                    </div>
-                    <div className = "display pair-details">
-                        <div> {symbol} </div>
-                        <div> {description} </div>
-                    </div>
-                </div>
-            )}
-
-             {!matchedCards && (
+    <div className = "game-background">
+        {!matchedCards && (
+            <CommonHeading />
+        )}
+        
+        {matchedCards && <PairMatchDetails symbol={symbol} description={description} />}
+        
+        {!matchedCards && (
             <div className="dashed-line"></div>
-             )}
-
-            <div className="main-game">
-                <div className = "second-heading display">
-                    <div className="score-heading display">
-                        <img className="trophy-image" src = "https://th.bing.com/th/id/OIP.2NkmdMG4mAZgAr8mlxnO2gHaKK?rs=1&pid=ImgDetMain" />
-                        <div className="best-score">{bestScore} </div>
-                    </div>
-                    <div className="time-heading display">
-                        <div> Time: </div>
-                        <div> {formatTime(time)}</div>
-                    </div>
-                    <div className="moves-heading display">
-                        <div> Moves: </div>
-                        <div> {moves} </div>
-                    </div>
-                </div>
-
-                {!allMatched && (
+        )}
+        
+        <div className="main-game">
+            <ScoreBoard moves={moves} time={time} bestScore={bestScore} />
+            {!allMatched && (
                 <Board 
-                    squares = {squares} 
-                    color = {color} 
-                    rows  = {rows} 
-                    cols = {cols} 
-                    handleClick = {handleClick}
-                />)}
-
-                {allMatched && (
-                    <div className = "board" style = {{padding : 0}} >
-                        <div className = "win-text">
-                            <div className="win-info"> 
-                                <div className="win-icon"> 🏆 </div>
-                                <div className="headline"> You win! </div>
-                                <div className = "display current-result">
-                                    <div className="current-result-item">
-                                        Moves:
-                                        <div className="highlight"> {moves} </div>
-                                    </div>
-                                    <div className="current-result-item">
-                                        Time:
-                                        <div className="highlight"> {formatTime(time)} </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className = "ranking-header"> Your ranking for board  size: 
-                            <span className = "ranking-size">  {rows}x{cols} </span>
-                        </div>
-
-                        {ranking.length > 0 && (
-                            <table>
-                                <thead>
-                                    <tr>
-                                    <th> Rank: </th>
-                                    <th> Moves: </th>
-                                    <th> Time: </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {ranking.map((score, index) => (
-                                        <tr key = {index}>
-                                            <td> {winIcons[index]} </td>
-                                            <td> {score.moves} </td>
-                                            <td> {formatTime(score.time)} </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        )}
-
-                        <div className = "display show-button win-text">
-                            <div className = "play-another-game" onClick = {playSameLevel} >
-                                Retry 
-                            </div>
-                            <div className = "play-another-game" onClick = {playNextLevel} >
-                                Play next 
-                            </div>
-                        </div>
-                    </div>
-                )}
-                
-                <div className="bottom-heading display">
-                    <div className="bottom-menu" onClick = {restartGameHandler} >Restart</div>
-                    <BottomHeading
-                    options={[
-                        {
-                          link: '/category',
-                          content: '🖼 Category',
-                        },
-                        { link: `/category/${category}/size`,
-                        content: 'Size' },
-                      ]}
-                    />
-                </div>
-            </div>
+                squares = {squares} 
+                color = {color} 
+                rows  = {rows} 
+                cols = {cols} 
+                handleClick = {handleClick}
+                />
+            )}
+            
+            {allMatched && ranking.length > 0 && (
+                <WinScreen 
+                ranking= {ranking}
+                moves= {moves}
+                time= {time}
+                rows= {rows}
+                cols= {cols}
+                playSameLevel={playSameLevel}
+                playNextLevel={playNextLevel}
+                />
+            )}
+            {!allMatched && (
+                <BottomMenu restartGameHandler={restartGameHandler} category={category} />
+            )}
         </div>
+    </div>
     )
 }
 

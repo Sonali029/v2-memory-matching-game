@@ -1,14 +1,14 @@
 import react, {useState, useEffect} from "react";
 import HeadingComponent from "./headingComponent";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
-import { setSize, setCategory } from './gameSlice';
+import { setSize, setCategory, setTime, setMoves, setGameStarted, setRanking, setBestScore} from './gameSlice';
 
 
 const SizeBoard = () => {
   const dispatch = useDispatch();
-  const categoryName = useSelector((state) => state.game.category);
   const navigate = useNavigate();
+  const categoryName = useSelector((state) => state.game.category);
 
     const sizes = [
       { x: 3, y: 2 },
@@ -19,9 +19,14 @@ const SizeBoard = () => {
       { x: 8, y: 5 },
       { x: 8, y: 6 },
     ];
-  
+
     const handleSizeChange = (size) => {
+    
       dispatch(setSize({ rows: size.x, cols: size.y }));
+      dispatch(setMoves(0));
+      dispatch(setTime(0));
+      dispatch(setGameStarted(false));
+    
       if (categoryName) {
         dispatch(setCategory(categoryName));
         navigate(`/category/${categoryName}`)
