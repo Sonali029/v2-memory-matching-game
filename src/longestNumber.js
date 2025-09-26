@@ -1,4 +1,4 @@
-import react, {useEffect} from "react";
+import {useEffect} from "react";
 import NumberGameComponent from "./numberGames";
 import { useSelector, useDispatch } from "react-redux";
 import {startGame,
@@ -8,15 +8,16 @@ import {startGame,
     setLearnNumber,
     setCorrectNumber,
     setWrongNumber,
+    getRandomNumber,
     incrementDigitLength} from './longestNumberSlice';
-import { getRandomNumber } from "./longestNumberSlice";
+import MainComponent from "./MainComponent";
+import ClassComponent from "./ClassComponent";
 
 const LongestNumberGame = () => {
    const dispatch = useDispatch();
    const longestNumberState = useSelector((state) => state.longestNumber);
    const { score, started, learnNumber, correctNumber, wrongNumber, numberToRemember, inputValue, digitLength } = longestNumberState;
    console.log("digit length", digitLength)
-
 
     useEffect(() => {
         const newNum = getRandomNumber(digitLength);
@@ -47,7 +48,7 @@ const LongestNumberGame = () => {
         }
     }
 
-    const playNewLevel = () => {
+    const playNextLevel = () => {
         dispatch(setLearnNumber(false));
         dispatch(setCorrectNumber(false));
         dispatch(incrementDigitLength());
@@ -58,40 +59,6 @@ const LongestNumberGame = () => {
         dispatch(setLearnNumber(false));
         dispatch(setWrongNumber(false));
         dispatch(setInputValue(''));
-    }
-
-    const ClassComponent = ({options}) => {
-        return (
-            <>
-            {options.map((option, index) => (
-                <div key = {index} >
-                <div className = {`game-instructions ${option.className} || ''}`} >
-                    {option.content}
-                </div>
-                <div className = "numbers answer" key = {index} >
-                    {option.number}
-                </div> 
-                </div>
-            ))}
-            </>
-        )
-    }
-
-    const MainComponent = ({heading, para, onClick, button, className, children, buttonClass}) => {
-        return (
-            <>
-            <div className = {className ? `numbers ${className}` : "numbers"} >
-                {heading}
-            </div>
-            <div className="game-instructions">
-                {para}
-            </div>
-            {children}
-            <div className = {buttonClass ? `play-button ${buttonClass}` : "play-button"} onClick = {onClick} >
-                {button}
-            </div>
-            </>
-        )
     }
 
     return (
@@ -150,7 +117,7 @@ const LongestNumberGame = () => {
                  <div className = "game-instructions add-margin" >
                     Are you ready for level {score + 1}?
                  </div>
-                 <div className = "play-button answer" onClick = {playNewLevel}>
+                 <div className = "play-button answer" onClick = {playNextLevel}>
                     Next
                  </div>
                 </>

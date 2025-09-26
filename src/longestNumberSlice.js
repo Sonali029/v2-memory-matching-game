@@ -28,7 +28,7 @@ const longestNumberSlice = createSlice({
             state.correctNumber = false;
             state.wrongNumber = false;
             state.inputValue = '';
-             state.digitLength = 1;
+            state.digitLength = 1;
         },
         setNumberToRemember(state, action) {
             state.numberToRemember = action.payload;
