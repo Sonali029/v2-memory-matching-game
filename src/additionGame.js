@@ -1,4 +1,4 @@
-import react, {useEffect} from "react";
+import {useEffect} from "react";
 import NumberGameComponent from "./numberGames";
 import { useSelector, useDispatch } from "react-redux";
 import { startNewGame,
@@ -8,9 +8,9 @@ import { startNewGame,
     setInputValue,
     incrementScore,
     decrementTime,
-    setGameOver
+    setGameOver,
+    getRandomNumber
     } from './additionGameSlice';
-import { getRandomNumber } from './additionGameSlice';
 
 const AdditionGame = () => {
     const dispatch = useDispatch();
