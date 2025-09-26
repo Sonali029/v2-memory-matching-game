@@ -2,7 +2,6 @@ import react, { useEffect } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import { initializeBoard,
     setSize,
-    setCategory,
     setMoves,
     incrementMoves,
     setTime,
@@ -98,17 +97,7 @@ const Game = () => {
         dispatch(initializeBoard({ category }));
         dispatch(setColor(getRandomColor()));
 
-        const key = `ranking-${category}-${rows}-${cols}`;
-        const existingScores = JSON.parse(localStorage.getItem(key)) || [];
-        if (existingScores.length) {
-            dispatch(setBestScore(existingScores[0].moves));
-            dispatch(setRanking(existingScores));
-        } else {
-            dispatch(setBestScore(0));
-            dispatch(setRanking([]));
-        }
-
-    }, [dispatch, category, rows, cols])
+    }, [dispatch, category])
     
     //Flipped Cards Logic
     useEffect(() => {
