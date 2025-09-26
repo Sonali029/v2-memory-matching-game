@@ -1,9 +1,7 @@
-import react, {useState, useEffect} from "react";
 import HeadingComponent from "./headingComponent";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
-import { setSize, setCategory, setTime, setMoves, setGameStarted, setRanking, setBestScore} from './gameSlice';
-
+import { setSize, setCategory, setTime, setMoves, setGameStarted } from './gameSlice';
 
 const SizeBoard = () => {
   const dispatch = useDispatch();
@@ -21,7 +19,6 @@ const SizeBoard = () => {
     ];
 
     const handleSizeChange = (size) => {
-    
       dispatch(setSize({ rows: size.x, cols: size.y }));
       dispatch(setMoves(0));
       dispatch(setTime(0));

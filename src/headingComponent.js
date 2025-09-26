@@ -1,7 +1,3 @@
-import react, {useState, useEffect} from "react";
-import AllGames from "./AllGamesCategory";
-import SizeBoard from "./SizeBoard";
-import CategoryBoard from './GameCategory';
 import {useNavigate} from "react-router-dom";
 
 const HeadingComponent = ({content}) => {
@@ -9,7 +5,7 @@ const HeadingComponent = ({content}) => {
 
     const clickCrossOption = () => {
         navigate("/");
-      }
+    }
   
     return (
     <>

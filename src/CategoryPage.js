@@ -19,7 +19,7 @@ const CategoryPage = () => {
   
   return (
   <div>
-    <Game category = {name} />
+    <Game/>
   </div>
   );
 };
