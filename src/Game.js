@@ -185,11 +185,8 @@ const Game = () => {
     
     // Update ranking and best score in local storage
     useEffect(() => {
-        const isAllMatched = squares.flat().every(cell => cell.matched);
-    
-        dispatch(setAllMatched(isAllMatched));
-    
-        if (isAllMatched) {
+
+        if (allMatched) {
             dispatch(setHeading(true));
             dispatch(setGameStarted(false));
     
